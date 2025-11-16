@@ -1,5 +1,6 @@
 import { Button } from './ui/button';
 import { LogIn } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -21,14 +22,15 @@ export function Header({ isLoggedIn, onLogin, username }: HeaderProps) {
             <span className="text-purple-300">Welcome, {username}!</span>
           )}
           {!isLoggedIn && (
-            <Button 
-              variant="outline" 
-              className="border-purple-500 text-purple-300 hover:bg-purple-500/20"
-              onClick={onLogin}
-            >
-              <LogIn className="mr-2 h-4 w-4" />
-              Login with Google
-            </Button>
+            <ConnectButton />
+            // <Button 
+            //   variant="outline" 
+            //   className="border-purple-500 text-purple-300 hover:bg-purple-500/20"
+            //   onClick={onLogin}
+            // >
+            //   <LogIn className="mr-2 h-4 w-4" />
+            //   Login with Google
+            // </Button>
           )}
         </div>
       </div>

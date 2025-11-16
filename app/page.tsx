@@ -12,6 +12,36 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Button } from '@/components/ui/button';
 import { Gamepad2, Lock } from 'lucide-react';
 
+import '@rainbow-me/rainbowkit/styles.css';
+import {
+  getDefaultConfig,
+  RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+import { WagmiProvider } from 'wagmi';
+import {
+  mainnet,
+  polygon,
+  optimism,
+  arbitrum,
+  base,
+  sepolia,
+  goerli,
+} from 'wagmi/chains';
+import {
+  QueryClientProvider,
+  QueryClient,
+} from "@tanstack/react-query";
+
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
+const config = getDefaultConfig({
+  appName: 'My RainbowKit App',
+  projectId: 'YOUR_PROJECT_ID',
+  chains: [mainnet, polygon, optimism, arbitrum, base, sepolia, goerli],
+  ssr: true, // If your dApp uses server side rendering (SSR)
+});
+const queryClient = new QueryClient();
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasUsername, setHasUsername] = useState(false);
@@ -37,7 +67,10 @@ export default function App() {
   const canJoinGame = isLoggedIn && hasUsername;
 
   return (
-    <div className="min-h-screen relative">
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+        <div className="min-h-screen relative">
       <AnimatedBackground />
       <div className="relative z-10">
         <Header isLoggedIn={isLoggedIn} onLogin={handleLogin} username={username} />
@@ -103,5 +136,10 @@ export default function App() {
       </main>
       </div>
     </div>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+
+    
   );
 }
