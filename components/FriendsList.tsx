@@ -4,35 +4,43 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Users, UserPlus, Circle, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { useAccount } from 'wagmi';
 
-// Mock friends data
-const mockFriends = [
-  { id: 1, username: 'TerritoryQueen', status: 'online', inGame: true },
-  { id: 2, username: 'PixelMaster', status: 'online', inGame: false },
-  { id: 3, username: 'GridWarrior', status: 'offline', inGame: false },
-  { id: 4, username: 'CryptoConqueror', status: 'online', inGame: true },
-];
+interface Friend {
+  id: string;
+  walletAddress: string;
+  username?: string;
+  status: 'online' | 'offline';
+  inGame: boolean;
+}
 
 interface FriendsListProps {
   isLoggedIn: boolean;
 }
 
 export function FriendsList({ isLoggedIn }: FriendsListProps) {
-  const [friends, setFriends] = useState(mockFriends);
-  const [newFriend, setNewFriend] = useState('');
+  const { address, isConnected } = useAccount();
+  const [friends, setFriends] = useState<Friend[]>([]); // Empty friends list - will be populated from database later
+  const [newFriendAddress, setNewFriendAddress] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleAddFriend = () => {
-    if (newFriend.trim()) {
-      const newFriendObj = {
-        id: friends.length + 1,
-        username: newFriend,
-        status: 'offline' as const,
-        inGame: false,
-      };
-      setFriends([...friends, newFriendObj]);
-      setNewFriend('');
+    // Validate wallet address format (basic check)
+    const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+    if (newFriendAddress.trim() && addressRegex.test(newFriendAddress.trim())) {
+      // TODO: Add friend to database via Supabase
+      // For now, just show a message that this will be implemented
+      console.log('Adding friend with wallet address:', newFriendAddress.trim());
+      // In the future, this will:
+      // 1. Store the friendship relationship in Supabase
+      // 2. Link wallet addresses together
+      // 3. Fetch friends list from database
+      
+      setNewFriendAddress('');
       setOpenDialog(false);
+      alert('Friend request feature coming soon! This will be stored in the database.');
+    } else {
+      alert('Please enter a valid wallet address (0x...)');
     }
   };
 
@@ -43,7 +51,7 @@ export function FriendsList({ isLoggedIn }: FriendsListProps) {
           <Users className="h-5 w-5 text-purple-400" />
           Friends
         </CardTitle>
-        {isLoggedIn && (
+        {isConnected && (
           <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
               <Button size="sm" variant="ghost" className="text-purple-300 hover:bg-purple-500/20">
@@ -54,21 +62,21 @@ export function FriendsList({ isLoggedIn }: FriendsListProps) {
               <DialogHeader>
                 <DialogTitle className="text-white">Add Friend</DialogTitle>
                 <DialogDescription className="text-gray-300">
-                  Enter your friend's username to send a friend request
+                  Enter your friend's wallet address to send a friend request
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <Input
-                  placeholder="Username"
-                  value={newFriend}
-                  onChange={(e) => setNewFriend(e.target.value)}
-                  className="bg-slate-900 border-purple-500/30 text-white"
+                  placeholder="0x..."
+                  value={newFriendAddress}
+                  onChange={(e) => setNewFriendAddress(e.target.value)}
+                  className="bg-slate-900 border-purple-500/30 text-white font-mono"
                   onKeyDown={(e) => e.key === 'Enter' && handleAddFriend()}
                 />
                 <Button
                   onClick={handleAddFriend}
                   className="w-full bg-purple-600 hover:bg-purple-700"
-                  disabled={!newFriend.trim()}
+                  disabled={!newFriendAddress.trim()}
                 >
                   Add Friend
                 </Button>
@@ -78,19 +86,25 @@ export function FriendsList({ isLoggedIn }: FriendsListProps) {
         )}
       </CardHeader>
       <CardContent>
-        {!isLoggedIn ? (
+        {!isConnected ? (
           <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg p-6 text-center">
             <Lock className="h-12 w-12 mx-auto mb-3 text-gray-500" />
             <p className="text-gray-400 text-sm">
-              Login to see your friends
+              Connect your wallet to see your friends
             </p>
           </div>
         ) : (
           <div className="space-y-2">
             {friends.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-4">
-                No friends yet. Add some to play together!
-              </p>
+              <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg p-6 text-center">
+                <Users className="h-12 w-12 mx-auto mb-3 text-gray-500" />
+                <p className="text-gray-400 text-sm mb-2">
+                  No friends yet
+                </p>
+                <p className="text-gray-500 text-xs">
+                  Add friends by their wallet address to play together!
+                </p>
+              </div>
             ) : (
               friends.map((friend) => (
                 <div
@@ -106,8 +120,13 @@ export function FriendsList({ isLoggedIn }: FriendsListProps) {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm truncate">{friend.username}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-white text-sm truncate">
+                      {friend.username || `${friend.walletAddress.slice(0, 6)}...${friend.walletAddress.slice(-4)}`}
+                    </p>
+                    <p className="text-xs text-gray-400 font-mono">
+                      {friend.walletAddress.slice(0, 10)}...
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
                       {friend.inGame ? 'In Game' : friend.status === 'online' ? 'Online' : 'Offline'}
                     </p>
                   </div>

@@ -31,7 +31,7 @@ export function OnboardingCard({ onComplete }: OnboardingCardProps) {
       <CardHeader>
         <CardTitle className="text-white text-2xl">Get Started</CardTitle>
         <CardDescription className="text-gray-300">
-          Create your username and deposit funds to start playing
+          Create your username and start playing
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -52,7 +52,7 @@ export function OnboardingCard({ onComplete }: OnboardingCardProps) {
             />
           </div>
 
-          {/* Wallet Connection */}
+          {/* Wallet Connection
           <div className="space-y-2">
             <Label className="text-purple-300">
               <Wallet className="inline mr-2 h-4 w-4" />
@@ -74,7 +74,7 @@ export function OnboardingCard({ onComplete }: OnboardingCardProps) {
                 </p>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Deposit Amount */}
           {walletConnected && (

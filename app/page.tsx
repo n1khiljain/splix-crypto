@@ -10,7 +10,7 @@ import { SkinCustomizer } from '@/components/SkinCustomizer';
 import { FriendsList } from '@/components/FriendsList';
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Button } from '@/components/ui/button';
-import { Gamepad2, Lock } from 'lucide-react';
+import { Gamepad2, Lock, User } from 'lucide-react';
 
 import '@rainbow-me/rainbowkit/styles.css';
 import {
@@ -33,6 +33,9 @@ import {
 } from "@tanstack/react-query";
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const config = getDefaultConfig({
   appName: 'My RainbowKit App',
@@ -42,7 +45,8 @@ const config = getDefaultConfig({
 });
 const queryClient = new QueryClient();
 
-export default function App() {
+function AppContent() {
+  const { address, isConnected } = useAccount();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasUsername, setHasUsername] = useState(false);
   const [username, setUsername] = useState('');
@@ -59,18 +63,24 @@ export default function App() {
     setHasUsername(true);
   };
 
-  const handleJoinGame = () => {
-    // Mock joining game
-    alert(`Joining game as ${username} with skin color ${selectedSkin}!`);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username.trim()) {
+      setHasUsername(true);
+    }
   };
 
-  const canJoinGame = isLoggedIn && hasUsername;
+  const handleJoinGame = () => {
+    // Mock joining game
+    const displayName = username || address?.slice(0, 6) + '...' + address?.slice(-4) || 'Player';
+    alert(`Joining game as ${displayName} with skin color ${selectedSkin}!`);
+  };
+
+  // Can join game if wallet is connected (username optional for now)
+  const canJoinGame = isConnected;
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-        <div className="min-h-screen relative">
+    <div className="min-h-screen relative">
       <AnimatedBackground />
       <div className="relative z-10">
         <Header isLoggedIn={isLoggedIn} onLogin={handleLogin} username={username} />
@@ -85,13 +95,27 @@ export default function App() {
               <p className="text-purple-100 mb-6">
                 Join a match and start conquering territory. Every square you claim earns you crypto!
               </p>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Username */}
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-purple-300">
+                    <User className="inline mr-2 h-4 w-4" />
+                    Username
+                  </Label>
+                  <Input
+                    id="username"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="bg-slate-900 border-purple-500/30 text-white placeholder:text-gray-500"
+                    required
+                  />
+                </div>
+              </form>
               {!canJoinGame && (
                 <p className="text-purple-200 text-sm mb-4 flex items-center gap-2">
                   <Lock className="h-4 w-4" />
-                  {!isLoggedIn 
-                    ? 'Please login and complete setup to join the game'
-                    : 'Please complete your profile setup below to join the game'
-                  }
+                  Please connect your wallet to join the game
                 </p>
               )}
               <Button 
@@ -101,12 +125,12 @@ export default function App() {
                 disabled={!canJoinGame}
               >
                 <Gamepad2 className="mr-2 h-5 w-5" />
-                {canJoinGame ? 'Join Game' : 'Login Required'}
+                {canJoinGame ? 'Join Game' : 'Connect Wallet'}
               </Button>
             </div>
 
-            {/* Onboarding Card - Show when not setup */}
-            {isLoggedIn && !hasUsername && (
+            {/* Onboarding Card - Show when wallet connected but no username */}
+            {isConnected && !hasUsername && (
               <OnboardingCard onComplete={handleOnboardingComplete} />
             )}
 
@@ -136,10 +160,17 @@ export default function App() {
       </main>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <AppContent />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
-
-    
   );
 }

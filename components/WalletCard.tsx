@@ -5,6 +5,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Wallet, Plus, Minus, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { useAccount, useBalance } from 'wagmi';
+import { formatEther } from 'viem';
 
 interface WalletCardProps {
   balance: number;
@@ -17,6 +19,23 @@ export function WalletCard({ balance, onBalanceChange, isLoggedIn }: WalletCardP
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [openDeposit, setOpenDeposit] = useState(false);
   const [openWithdraw, setOpenWithdraw] = useState(false);
+  
+  // Get connected wallet info
+  const { address, isConnected } = useAccount();
+  const { data: balanceData, isLoading: balanceLoading } = useBalance({
+    address: address,
+  });
+  
+  // Use real wallet balance if connected, otherwise use prop balance
+  const displayBalance = isConnected && balanceData 
+    ? parseFloat(formatEther(balanceData.value))
+    : balance;
+  
+  // Format wallet address for display
+  const formatAddress = (addr: string | undefined) => {
+    if (!addr) return 'Not connected';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount);
@@ -45,28 +64,34 @@ export function WalletCard({ balance, onBalanceChange, isLoggedIn }: WalletCardP
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!isLoggedIn ? (
+        {!isConnected ? (
           <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg p-6 text-center">
             <Lock className="h-12 w-12 mx-auto mb-3 text-gray-500" />
             <p className="text-gray-400 text-sm">
-              Login to connect your wallet
+              Connect your wallet to view balance
             </p>
           </div>
         ) : (
           <>
             {/* Balance Display */}
             <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-4">
-              <p className="text-gray-300 text-sm mb-1">Total Balance</p>
-              <p className="text-white text-3xl">{balance.toFixed(4)} ETH</p>
-              <p className="text-gray-400 text-sm mt-1">
-                ≈ ${(balance * 3000).toFixed(2)} USD
-              </p>
+              <p className="text-gray-300 text-sm mb-1">Wallet Balance</p>
+              {balanceLoading ? (
+                <p className="text-white text-3xl">Loading...</p>
+              ) : (
+                <>
+                  <p className="text-white text-3xl">{displayBalance.toFixed(4)} {balanceData?.symbol || 'ETH'}</p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    ≈ ${(displayBalance * 3000).toFixed(2)} USD
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Wallet Address */}
             <div className="space-y-1">
               <p className="text-gray-400 text-xs">Wallet Address</p>
-              <p className="text-purple-300 text-sm font-mono">0x742d...4b2a</p>
+              <p className="text-purple-300 text-sm font-mono">{formatAddress(address)}</p>
             </div>
 
             {/* Action Buttons */}
