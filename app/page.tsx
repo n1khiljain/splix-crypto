@@ -90,10 +90,10 @@ function AppContent() {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Join Game Section */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-8 shadow-2xl">
-              <h2 className="text-white text-3xl mb-4">Ready to Play?</h2>
+            <div className="bg-slate-800/90 rounded-lg p-8 shadow-2xl">
+              <h2 className="text-white text-3xl mb-4">Join Game</h2>
               <p className="text-purple-100 mb-6">
-                Join a match and start conquering territory. Every square you claim earns you crypto!
+
               </p>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Username */}
@@ -130,9 +130,9 @@ function AppContent() {
             </div>
 
             {/* Onboarding Card - Show when wallet connected but no username */}
-            {isConnected && !hasUsername && (
+            {/* {isConnected && !hasUsername && (
               <OnboardingCard onComplete={handleOnboardingComplete} />
-            )}
+            )}*/}
 
             {/* Leaderboard */}
             <Leaderboard currentUsername={username} />
@@ -151,10 +151,10 @@ function AppContent() {
             <FriendsList isLoggedIn={isLoggedIn} />
 
             {/* Skin Customizer */}
-            <SkinCustomizer 
+            {/* <SkinCustomizer 
               selectedSkin={selectedSkin} 
               onSkinChange={setSelectedSkin} 
-            />
+            />*/}
           </div>
         </div>
       </main>

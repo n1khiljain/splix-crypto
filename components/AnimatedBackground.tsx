@@ -39,7 +39,7 @@ export function AnimatedBackground() {
 
     // Add random active squares
     const addRandomSquare = () => {
-      if (activeSquares.length < 15) {
+      if (activeSquares.length < 30) {
         const cols = Math.floor(canvas.width / gridSize);
         const rows = Math.floor(canvas.height / gridSize);
         

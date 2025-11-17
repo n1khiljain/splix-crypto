@@ -74,7 +74,7 @@ export function WalletCard({ balance, onBalanceChange, isLoggedIn }: WalletCardP
         ) : (
           <>
             {/* Balance Display */}
-            <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-4">
+            <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-4">
               <p className="text-gray-300 text-sm mb-1">Wallet Balance</p>
               {balanceLoading ? (
                 <p className="text-white text-3xl">Loading...</p>
