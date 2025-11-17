@@ -32,7 +32,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +47,7 @@ const queryClient = new QueryClient();
 
 function AppContent() {
   const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasUsername, setHasUsername] = useState(false);
   const [username, setUsername] = useState('');
@@ -71,9 +72,14 @@ function AppContent() {
   };
 
   const handleJoinGame = () => {
+    // If wallet is not connected, open connect modal
+    if (!isConnected) {
+      openConnectModal?.();
+      return;
+    }
     // Mock joining game
     const displayName = username || address?.slice(0, 6) + '...' + address?.slice(-4) || 'Player';
-    alert(`Joining game as ${displayName} with skin color ${selectedSkin}!`);
+    toast(`Joining game as ${displayName} with skin color ${selectedSkin}!`);
   };
 
   // Can join game if wallet is connected (username optional for now)
@@ -90,7 +96,7 @@ function AppContent() {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Join Game Section */}
-            <div className="bg-slate-800/90 rounded-lg p-8 shadow-2xl">
+            <div className="bg-slate-800/90 rounded-lg p-8 border border-purple-500/30 rounded-lg shadow-2xl">
               <h2 className="text-white text-3xl mb-4">Join Game</h2>
               <p className="text-purple-100 mb-6">
 
@@ -120,9 +126,8 @@ function AppContent() {
               )}
               <Button 
                 size="lg" 
-                className="bg-white text-purple-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-white text-purple-600 hover:bg-gray-100"
                 onClick={handleJoinGame}
-                disabled={!canJoinGame}
               >
                 <Gamepad2 className="mr-2 h-5 w-5" />
                 {canJoinGame ? 'Join Game' : 'Connect Wallet'}
